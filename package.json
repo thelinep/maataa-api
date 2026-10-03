@@ -1,0 +1,16 @@
+{
+  "name": "@maataa/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "check": "node --check src/index.js && node --check src/server.js && node --check src/auth/config.js && node --check src/auth/oidc-verifier.js && node --check src/auth/actor.js && node --check src/auth/tenant-authorization.js && node --check src/auth/errors.js && node --check src/http/server.js"
+  },
+  "dependencies": {
+    "jose": "6.2.12"
+  }
+}
