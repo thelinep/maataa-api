@@ -1,0 +1,11 @@
+{
+  "policyId": "maataa.authorization.matrix.v1",
+  "policyVersion": "0.1.0",
+  "proposalFile": "authorization-matrix.proposed.json",
+  "proposalSha256": "7f76dfb5b1025508d528bb390fbf0e96176ef5a7d6e0518792dbbed616d4356b",
+  "status": "PENDING_BUSINESS_OWNER_SIGN_OFF",
+  "businessOwner": null,
+  "decision": null,
+  "decidedAt": null,
+  "conditions": []
+}

@@ -74,7 +74,7 @@ Field rules:
 - `permissions` is a sorted, unique array of permission identifiers produced by a reviewed server-side role/grant policy. **That policy is not implemented yet, so the current value is always empty and grants no action permissions.** A role name alone does not imply an API operation is allowed.
 - `identity.subject` and `session.tokenId` are for identity/audit correlation; never log bearer tokens. Client headers such as `X-User-ID`, `X-Organisation-ID`, `X-Workspace-ID`, and role/permission fields are untrusted.
 
-The canonical actor/context is rebuilt for each request. No tenant or permission authority is cached in a long-lived JWT. Current implementation checks membership for tenant-context routes but does not yet provide resource-level permission grants.
+The canonical actor/context is rebuilt for each request. No tenant or permission authority is cached in a long-lived JWT. Current implementation checks membership for tenant-context routes but does not yet provide resource-level permission grants. The proposal remains unenforced until the business owner signs off on the hash in `authorization-matrix-approval.json`.
 
 ## Canonical data mapping
 

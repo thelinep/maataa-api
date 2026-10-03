@@ -1,0 +1,80 @@
+{
+  "policyId": "maataa.authorization.matrix.v1",
+  "policyVersion": "0.1.0",
+  "status": "PROPOSED",
+  "scope": "tenant-resource",
+  "actions": [
+    "read",
+    "edit",
+    "approve",
+    "delete",
+    "administer"
+  ],
+  "roles": [
+    "admin",
+    "editor",
+    "viewer",
+    "approver"
+  ],
+  "matrix": {
+    "admin": {
+      "read": "ALLOW",
+      "edit": "ALLOW",
+      "approve": "ALLOW",
+      "delete": "ALLOW",
+      "administer": "ALLOW"
+    },
+    "editor": {
+      "read": "ALLOW",
+      "edit": "ALLOW",
+      "approve": "DENY",
+      "delete": "DENY",
+      "administer": "DENY"
+    },
+    "viewer": {
+      "read": "ALLOW",
+      "edit": "DENY",
+      "approve": "DENY",
+      "delete": "DENY",
+      "administer": "DENY"
+    },
+    "approver": {
+      "read": "ALLOW",
+      "edit": "DENY",
+      "approve": "ALLOW",
+      "delete": "DENY",
+      "administer": "DENY"
+    }
+  },
+  "roleSources": {
+    "organisationMembership": {
+      "owner": "admin",
+      "admin": "admin",
+      "member": "editor",
+      "viewer": "viewer"
+    },
+    "workspaceMembership": {
+      "admin": "admin",
+      "editor": "editor",
+      "viewer": "viewer"
+    },
+    "approver": "Requires a separately approved, tenant-scoped assignment; not present in current canonical membership enums."
+  },
+  "constraints": [
+    "Every permission check is resource- and tenant-scoped.",
+    "Workspace access requires active organisation membership and active membership in that exact workspace under the same organisation.",
+    "An actor cannot approve a change that they authored or most recently edited, regardless of role.",
+    "delete means soft-delete; permanent purge is not included and requires a separately reviewed policy.",
+    "administer is limited to managing access and settings within the actor's authorized tenant scope; it is not platform-wide root access.",
+    "Roles and permissions are derived server-side from canonical membership and approved policy; token role, permission, and tenant claims are ignored.",
+    "Until business-owner approval and implementation of the permission resolver, effective permissions remain empty and all protected actions are denied."
+  ],
+  "permissionFormat": "<resource>.<action>",
+  "examples": [
+    "spatial.layout.read",
+    "spatial.layout.edit",
+    "spatial.layout.approve",
+    "spatial.layout.delete",
+    "spatial.layout.administer"
+  ]
+}
