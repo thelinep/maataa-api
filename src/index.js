@@ -1,6 +1,7 @@
 export { loadAuthConfig } from './auth/config.js';
 export { createOidcAccessTokenVerifier } from './auth/oidc-verifier.js';
 export { authenticateActor } from './auth/actor.js';
+export { createTrustedActorContext } from './auth/actor-context.js';
 export {
   requireOrganisationMembership,
   requireWorkspaceMembership,

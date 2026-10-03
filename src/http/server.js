@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { authenticateActor } from '../auth/actor.js';
+import { createTrustedActorContext } from '../auth/actor-context.js';
 import {
   requireOrganisationMembership,
   requireWorkspaceMembership,
@@ -42,13 +43,7 @@ export function createApiServer({ tokenVerifier, identityDirectory, membershipDi
         });
         if (url.pathname === '/v1/me') {
           return json(response, 200, {
-            actor: {
-              userId: actor.userId,
-              issuer: actor.issuer,
-              subject: actor.subject,
-              clientId: actor.clientId,
-              expiresAt: actor.expiresAt,
-            },
+            actor: createTrustedActorContext(actor),
           });
         }
 
@@ -56,10 +51,9 @@ export function createApiServer({ tokenVerifier, identityDirectory, membershipDi
         const scope = workspaceId
           ? await requireWorkspaceMembership(actor, organisationId, workspaceId, membershipDirectory)
           : await requireOrganisationMembership(actor, organisationId, membershipDirectory);
+        const { actor: resolvedActor, ...tenant } = scope;
         return json(response, 200, {
-          authorised: true,
-          organisationId: scope.organisationId,
-          ...(workspaceId ? { workspaceId: scope.workspaceId } : {}),
+          actor: createTrustedActorContext(resolvedActor, { tenant }),
         });
       } catch (error) {
         if (error instanceof AuthenticationError) {

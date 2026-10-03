@@ -29,11 +29,13 @@ export async function authenticateActor(authorization, { tokenVerifier, identity
   }
 
   return Object.freeze({
+    actorType: 'human',
     userId: identity.userId,
     issuer: token.issuer,
     subject: token.subject,
     tokenId: token.tokenId,
     clientId: token.clientId,
+    issuedAt: token.issuedAt,
     expiresAt: token.expiresAt,
   });
 }

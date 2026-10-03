@@ -17,19 +17,64 @@ Clients use Authorization Code with PKCE S256. Do not enable implicit flow or re
 - **Expire:** proposed initial policy is a 5-minute access-token lifetime, 30-minute SSO idle timeout, and 12-hour SSO maximum. Configure these in Keycloak; the API independently rejects tokens older than 5 minutes (configurable only within 1–10 minutes). No production realm has been configured here.
 - **Logout/revocation:** logout is performed against Keycloak's OIDC logout endpoint and terminates its SSO session. The API is stateless and does not introspect each request; a previously issued access token can remain usable until its short expiry. If immediate revocation becomes a requirement, add a reviewed revocation/introspection or denylist design before claiming it.
 
-## Trusted actor claims
+## Trusted claim and actor-context format
 
-| Claim | Trust/use |
-| --- | --- |
-| `iss` | Must exactly equal configured Keycloak realm issuer. |
-| `sub` | Stable IdP subject; mapped only as `(iss, sub)` to `identity.users.id`. Never map by email. |
-| `aud` | Must contain the configured API audience. |
-| `azp` | Must match an explicitly allowed first-party client ID. |
-| `iat`, `exp`, `jti` | Required; age and expiry checked. `jti` is retained in the request actor for audit correlation, not logged by default. |
-| `email`, display name | Presentation hints only; never identity keys or authorization inputs. |
-| `roles`, groups, `organisation_id`, `workspace_id` | Not authorization grants in this API. Ignore them unless a separately reviewed mapping is implemented. |
+There are two distinct formats: the **signed Keycloak access-token claims** and the **server-derived MAATAA actor context**. The latter is created only after token verification, active-user resolution, and (for tenant routes) live membership checks. A `/v1/me` response is informational and must never be accepted back as proof of identity or authorization.
 
-The canonical actor is an API-created object after token verification and active-user lookup. Request headers such as `X-User-ID`, `X-Organisation-ID`, `X-Workspace-ID`, and client-supplied role fields are untrusted. Tenant IDs may be selected in route parameters, but each request must check the active canonical membership in that tenant. Workspace operations must check both active organisation membership and active workspace membership with the same user, organisation, and workspace IDs. Role-to-permission policy must be added explicitly; membership alone does not imply every action is permitted.
+### Signed OIDC access-token claims
+
+| Claim | Required | Trust and use |
+| --- | --- | --- |
+| `iss` | Yes | Exact configured Keycloak realm issuer. |
+| `sub` | Yes | Stable Keycloak subject; resolve only as `(iss, sub)` to `identity.users.id`. Never resolve by email. |
+| `aud` | Yes | Must include the configured `maataa-api` audience. |
+| `azp` | Yes | Must match `AUTH_ALLOWED_CLIENT_IDS`. |
+| `iat`, `exp`, `jti` | Yes | Numeric issue/expiry times and non-empty token ID; enforce expiry and max age. |
+| `nbf` | If present | Enforce not-before time through JWT validation. |
+| `email`, name/profile claims | Optional | Display/contact hints only. Not identity keys or authorization inputs. |
+| `roles`, groups, `scope`, `user_id`, `actor_type`, organisation/workspace claims | Ignored as grants | They do not become MAATAA permissions or tenant authority merely because the token is signed. |
+
+### Server-derived `maataa.actor-context.v1`
+
+The API passes this object to handlers after verifying the authority chain. This exact JSON shape is the trusted in-process format; IDs and permissions shown in an HTTP response remain untrusted if a client sends them back.
+
+```json
+{
+  "schemaVersion": "maataa.actor-context.v1",
+  "actorType": "human",
+  "userId": "canonical identity.users.id UUID",
+  "identity": {
+    "issuer": "exact configured OIDC issuer",
+    "subject": "verified OIDC sub",
+    "clientId": "verified allowed azp"
+  },
+  "session": {
+    "tokenId": "verified jti",
+    "issuedAt": 1791072000,
+    "expiresAt": 1791072300
+  },
+  "tenant": {
+    "organisationId": "UUID from the requested route, membership-checked",
+    "organisationMembershipId": "active canonical membership row ID",
+    "organisationRole": "member",
+    "workspaceId": "optional UUID from the requested route, membership-checked",
+    "workspaceMembershipId": "optional active canonical membership row ID",
+    "workspaceRole": "optional canonical workspace role"
+  },
+  "permissions": []
+}
+```
+
+Field rules:
+
+- `actorType` is `human` only after `(iss, sub)` maps to an active `identity.users` row. `service` is reserved and rejected until a service-principal authority and mapping are designed; it must not be inferred from an unknown human.
+- `userId` is MAATAA's canonical UUID, never a client-supplied `user_id` or an assumed Keycloak subject.
+- `tenant` is `null` on an identity-only request. Organisation and workspace IDs come from the request path and must be checked against active membership rows for this same `userId`.
+- `organisationRole` is read from the active canonical organisation membership (`owner`, `admin`, `member`, or `viewer`). `workspaceRole` is read from the active workspace membership (`admin`, `editor`, or `viewer`). These roles are context-scoped, not global.
+- `permissions` is a sorted, unique array of permission identifiers produced by a reviewed server-side role/grant policy. **That policy is not implemented yet, so the current value is always empty and grants no action permissions.** A role name alone does not imply an API operation is allowed.
+- `identity.subject` and `session.tokenId` are for identity/audit correlation; never log bearer tokens. Client headers such as `X-User-ID`, `X-Organisation-ID`, `X-Workspace-ID`, and role/permission fields are untrusted.
+
+The canonical actor/context is rebuilt for each request. No tenant or permission authority is cached in a long-lived JWT. Current implementation checks membership for tenant-context routes but does not yet provide resource-level permission grants.
 
 ## Canonical data mapping
 
