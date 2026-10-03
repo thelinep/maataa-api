@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "maataa.environment-binding.v1",
+  "environmentId": "maataa-api.preflight",
+  "name": "preflight",
+  "type": "preflight",
+  "status": "BLOCKED_MISSING_VERIFIED_BINDING",
+  "application": {
+    "id": "maataa-api",
+    "requestedHostname": "api.tlps.in",
+    "hostnameVerified": false
+  },
+  "runtime": {
+    "provider": null,
+    "versionRequired": "Node.js >=22",
+    "versionObserved": null,
+    "status": "NOT_BOUND"
+  },
+  "identityAuthority": {
+    "provider": "Keycloak",
+    "providerVersion": null,
+    "issuer": null,
+    "realmIdentity": null,
+    "secretReference": null,
+    "status": "NOT_CONFIGURED"
+  },
+  "database": {
+    "provider": "PostgreSQL",
+    "providerStatus": "INTENDED_NOT_VERIFIED",
+    "version": null,
+    "databaseIdentity": null,
+    "schemaIdentity": {
+      "registry": "maataa-ui/fused-organism/packages/domain-registry/data/table-contracts.json",
+      "contractSetSha256": null
+    },
+    "secretReference": null,
+    "status": "NOT_CONFIGURED"
+  },
+  "secretHandling": {
+    "rawSecretsStored": false,
+    "secretReferencesRequiredFor": [
+      "identityAuthority",
+      "database"
+    ]
+  },
+  "unresolvedFacts": [
+    "accountable hosting owner and hosting provider/version",
+    "observed Node.js runtime version",
+    "Keycloak version, exact issuer, and realm identity",
+    "verified PostgreSQL version and target database identity",
+    "canonical schema contract-set hash for the target",
+    "secret-manager references for the OIDC client and database connection",
+    "hostname and environment verification evidence"
+  ],
+  "hosting": {
+    "provider": null,
+    "version": null,
+    "serviceIdentity": null,
+    "status": "UNSELECTED"
+  }
+}

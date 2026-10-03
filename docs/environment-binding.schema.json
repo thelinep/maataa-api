@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:maataa:schema:environment-binding:v1",
+  "title": "MAATAA Environment Binding",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "environmentId",
+    "name",
+    "type",
+    "status",
+    "application",
+    "hosting",
+    "runtime",
+    "identityAuthority",
+    "database",
+    "secretHandling",
+    "unresolvedFacts"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "maataa.environment-binding.v1"
+    },
+    "environmentId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "enum": [
+        "development",
+        "preflight",
+        "staging",
+        "production"
+      ]
+    },
+    "status": {
+      "enum": [
+        "DECLARED",
+        "BLOCKED_MISSING_VERIFIED_BINDING",
+        "VERIFIED"
+      ]
+    },
+    "application": {
+      "type": "object",
+      "required": [
+        "id",
+        "requestedHostname",
+        "hostnameVerified"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "requestedHostname": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hostnameVerified": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "provider",
+        "versionRequired",
+        "versionObserved",
+        "status"
+      ],
+      "properties": {
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionRequired": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionObserved": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "NOT_BOUND",
+            "DECLARED",
+            "VERIFIED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "identityAuthority": {
+      "type": "object",
+      "required": [
+        "provider",
+        "providerVersion",
+        "issuer",
+        "realmIdentity",
+        "secretReference",
+        "status"
+      ],
+      "properties": {
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "providerVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "issuer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "realmIdentity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "secretReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "NOT_CONFIGURED",
+            "DECLARED",
+            "VERIFIED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "database": {
+      "type": "object",
+      "required": [
+        "provider",
+        "providerStatus",
+        "version",
+        "databaseIdentity",
+        "schemaIdentity",
+        "secretReference",
+        "status"
+      ],
+      "properties": {
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "providerStatus": {
+          "enum": [
+            "UNSELECTED",
+            "INTENDED_NOT_VERIFIED",
+            "VERIFIED"
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "databaseIdentity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schemaIdentity": {
+          "type": "object",
+          "required": [
+            "registry",
+            "contractSetSha256"
+          ],
+          "properties": {
+            "registry": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "contractSetSha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "secretReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "NOT_CONFIGURED",
+            "DECLARED",
+            "VERIFIED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "secretHandling": {
+      "type": "object",
+      "required": [
+        "rawSecretsStored",
+        "secretReferencesRequiredFor"
+      ],
+      "properties": {
+        "rawSecretsStored": {
+          "const": false
+        },
+        "secretReferencesRequiredFor": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "unresolvedFacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hosting": {
+      "type": "object",
+      "required": [
+        "provider",
+        "version",
+        "serviceIdentity",
+        "status"
+      ],
+      "properties": {
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "serviceIdentity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "UNSELECTED",
+            "DECLARED",
+            "VERIFIED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
